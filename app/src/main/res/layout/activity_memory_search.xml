@@ -34,7 +34,7 @@
             android:layout_weight="1"
             android:entries="@array/data_types"
             android:background="#333333"/>
-            
+
         <Spinner
             android:id="@+id/search_type_spinner"
             android:layout_width="0dp"
@@ -50,7 +50,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="First Scan / Search"
-        android:onClick="onSearchClicked"
         android:background="#444444"
         android:textColor="#FFFFFF"/>
 
@@ -80,17 +79,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Refine"
-            android:onClick="onRefineClicked"
             android:background="#444444"
             android:textColor="#FFFFFF"/>
-            
+
         <Button
             android:id="@+id/freeze_dump_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Freeze/DUMP" 
-            android:onClick="onFreezeDumpClicked"
             android:background="@color/alert_fatal"
             android:textColor="@color/core_background"/>
     </LinearLayout>
