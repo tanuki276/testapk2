@@ -134,7 +134,7 @@ public class MemorySearchActivity extends Activity {
         MemoryResult selectedResult = memoryManager.getCurrentResults().get(position);
 
         final EditText input = new EditText(this);
-        input.setText(String.valueOf(selectedResult.valueDecimal));
+        input.setText(String.valueOf(selectedResult.valueDec));
 
         new AlertDialog.Builder(this)
             .setTitle("Edit Memory Value")
@@ -166,7 +166,7 @@ public class MemorySearchActivity extends Activity {
         List<String> displayList = new ArrayList<>();
         for (MemoryResult result : results) {
             String status = result.isFrozen ? "[FROZEN] " : "         ";
-            displayList.add(status + result.fakeAddress + " [" + result.region + "] -> DEC: " + result.valueDecimal + " / HEX: " + result.valueHex);
+            displayList.add(status + result.fakeAddress + " [" + result.region + "] -> DEC: " + result.valueDec + " / HEX: " + result.valueHex);
         }
 
         resultsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayList);
