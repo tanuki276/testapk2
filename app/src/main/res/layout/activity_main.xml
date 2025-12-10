@@ -3,19 +3,42 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="@color/core_background"> 
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ghost Hacker X Console"
-        android:textSize="24sp"
-        android:layout_marginBottom="50dp"/>
+        android:text="@string/app_name" 
+        android:textSize="20sp"
+        android:textColor="@color/core_text_primary" 
+        android:layout_marginBottom="30dp"/>
 
-    <Button
-        android:id="@+id/launch_button"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Launch Floating Icon"
-        android:onClick="launchFloatingIcon"/>
+        android:text="Select Target Process:"
+        android:textColor="@color/core_text_secondary"
+        android:layout_marginTop="20dp"/>
+        
+    <Spinner
+        android:id="@+id/target_spinner"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:entries="@array/target_processes"
+        android:background="@color/module_panel_bg"
+        android:popupBackground="@color/core_background"
+        android:prompt="@string/select_target"
+        android:layout_marginBottom="30dp"/>
+
+    <Button
+        android:id="@+id/attach_button"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Attach Core (Inject Service)" 
+        android:onClick="onAttachClicked"
+        android:background="@color/alert_fatal"
+        android:textColor="@color/core_background"/> 
+        
 </LinearLayout>
+
