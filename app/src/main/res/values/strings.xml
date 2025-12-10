@@ -6,4 +6,6 @@
     <string name="status_stealth_mode">Subsystem Status: Stealth Protocol Engaged</string>
     <string name="button_launch_icon">Execute Injection Service (Overlay)</string>
     <string name="error_fatal_permission">CRITICAL FAILURE: Required Privilege (Overlay) Denied. Re-authorize.</string>
+    
+    <string name="select_target">Select a Process to Attach</string>
 </resources>
