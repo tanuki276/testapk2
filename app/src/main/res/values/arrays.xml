@@ -19,8 +19,8 @@
     <string-array name="search_types">
         <item>Equal To (=)</item>
         <item>Not Equal To (!=)</item>
-        <item>Greater Than (>)</item>
-        <item>Less Than (<)</item>
+        <item>Greater Than (&gt;)</item>
+        <item>Less Than (&lt;)</item>
         <item>Fuzzy (Near)</item>
     </string-array>
 
