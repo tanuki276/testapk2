@@ -1,0 +1,8 @@
+<resources>
+    <color name="console_background">#000000</color>
+    <color name="console_text_primary">#00FF00</color>
+    <color name="console_text_secondary">#AAAAAA</color>
+    <color name="alert_critical">#FF0000</color>
+    <color name="status_ok">#00CC00</color>
+    <color name="stealth_bg">#111111</color>
+</resources>
