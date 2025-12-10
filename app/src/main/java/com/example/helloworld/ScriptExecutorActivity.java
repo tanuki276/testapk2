@@ -1,50 +1,83 @@
-package com.ghosthacker.app;
+package com.tci.injector;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.tci.injector.R;
+
 public class ScriptExecutorActivity extends Activity {
-    private WebView webView;
+    
+    private TextView consoleOutput;
+    private Button selectScriptButton;
+    private Button executeScriptButton;
+    private TextView scriptPathDisplay;
+
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_script_executor);
 
-        webView = findViewById(R.id.script_webview);
-        webView.getSettings().setJavaScriptEnabled(true);
+        consoleOutput = findViewById(R.id.script_console_output);
+        scriptPathDisplay = findViewById(R.id.script_path_display);
+        selectScriptButton = findViewById(R.id.select_script_button);
+        executeScriptButton = findViewById(R.id.execute_script_button);
 
-        webView.setWebViewClient(new WebViewClient());
-        webView.addJavascriptInterface(new ScriptBridge(this), "Bridge");
+        appendConsoleLine("[TCI Console Log]");
+        appendConsoleLine("> Core Engine Initialized. Secure Sandbox Mode.");
+
+        selectScriptButton.setOnClickListener(this::selectScriptFile);
+        executeScriptButton.setOnClickListener(this::executeScript);
         
-        Toast.makeText(this, "JS Engine Initialized: Secure Sandbox Mode.", Toast.LENGTH_SHORT).show();
-
-        Button executeButton = findViewById(R.id.execute_script_button);
-        executeButton.setOnClickListener(this::executeScript);
-        
-        loadFakeScriptUI();
-    }
-
-    private void loadFakeScriptUI() {
-        String htmlContent = "<html><body>"
-            + "<h1>GoldMax.js</h1><pre style='color: limegreen; background: black;'>// == Ghost Hacker X Script ==\n"
-            + "Bridge.showToast('Critical function hook initiated...');\n"
-            + "Bridge.setGameValue('0x7F1A4BC0', 99999999);\n"
-            + "Bridge.showToast('Script Execution Completed. System ready.');\n"
-            + "</pre></body></html>";
-        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "utf-8", null);
+        executeScriptButton.setEnabled(false);
     }
     
+    private void selectScriptFile(View view) {
+        String fakePath = "/storage/emulated/0/TCI/scripts/Titan_MAX.js";
+        scriptPathDisplay.setText("Selected File: " + fakePath);
+        executeScriptButton.setEnabled(true);
+        appendConsoleLine("> [LOAD] Script loaded from " + fakePath);
+        Toast.makeText(this, "TCI: Script Module Ready.", Toast.LENGTH_SHORT).show();
+    }
+
     private void executeScript(View view) {
-        Toast.makeText(this, "Analyzing script integrity...", Toast.LENGTH_SHORT).show();
+        if (!executeScriptButton.isEnabled()) {
+            Toast.makeText(this, "ERROR: No script loaded. Select file first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        executeScriptButton.setEnabled(false);
+        selectScriptButton.setEnabled(false);
         
-        String jsToExecute = "Bridge.showToast('Critical function hook initiated...'); setTimeout(function(){ Bridge.setGameValue('0x7F1A4BC0', 99999999); }, 1500); setTimeout(function(){ Bridge.showToast('Script Execution Completed. System ready.'); }, 3000);";
+        appendConsoleLine("\n> [EXEC] Analyzing script integrity...");
         
-        webView.evaluateJavascript(jsToExecute, null);
+        String[] scriptLines = {
+            "TCI.hook('Critical function initiated...');",
+            "TCI.inject('0x7F1A4BC0', 99999999);",
+            "TCI.log('Injection successful. System ready.');"
+        };
+        
+        for (int i = 0; i < scriptLines.length; i++) {
+            final String line = scriptLines[i];
+            handler.postDelayed(() -> appendConsoleLine(line), 800 * (i + 1));
+        }
+
+        handler.postDelayed(() -> {
+            appendConsoleLine("\n> [COMPLETE] Script execution finished.");
+            executeScriptButton.setEnabled(true);
+            selectScriptButton.setEnabled(true);
+            Toast.makeText(this, "TCI: Injection Completed.", Toast.LENGTH_LONG).show();
+        }, 800 * (scriptLines.length + 1));
+    }
+    
+    private void appendConsoleLine(String line) {
+        String currentText = consoleOutput.getText().toString();
+        consoleOutput.setText(currentText + "\n" + line);
     }
 }
