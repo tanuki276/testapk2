@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Ghost Hacker X</string>
-    <string name="title_system_console">System Console</string>
-    <string name="title_memory_scan">Memory Injection Interface</string>
-    <string name="status_attached_process">Process Hook Established</string>
-    <string name="status_stealth_mode">Stealth Mode Active</string>
-    <string name="button_launch_icon">Initialize Overlay Service</string>
-    <string name="error_fatal_permission">FATAL: SYSTEM_OVERLAY permission required.</string>
+    <string name="app_name">Titan Core Injector</string>
+    <string name="title_system_console">TCI Main Console</string>
+    <string name="title_memory_scan">Memory Region Access Interface</string>
+    <string name="status_attached_process">Process State Hooked. Ready for Injection.</string>
+    <string name="status_stealth_mode">Subsystem Status: Stealth Protocol Engaged</string>
+    <string name="button_launch_icon">Execute Injection Service (Overlay)</string>
+    <string name="error_fatal_permission">CRITICAL FAILURE: Required Privilege (Overlay) Denied. Re-authorize.</string>
 </resources>
