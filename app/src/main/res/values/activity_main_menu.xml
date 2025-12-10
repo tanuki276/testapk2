@@ -1,0 +1,40 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="#222222">
+
+    <TextView
+        android:id="@+id/game_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#00FF00"
+        android:textSize="12sp"
+        android:text="ATTACHED: (PID: 00000)"
+        android:paddingBottom="10dp"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1. スクリプトを選択"
+        android:onClick="onScriptSelectClicked"
+        android:background="#444444"
+        android:textColor="#FFFFFF"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="2. メモリを検索 (Search)"
+        android:onClick="onMemorySearchClicked"
+        android:background="#444444"
+        android:textColor="#FFFFFF"/>
+    
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="閉じる"
+        android:onClick="onCloseClicked"
+        android:background="#444444"
+        android:textColor="#FFFFFF"/>
+</LinearLayout>
