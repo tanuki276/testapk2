@@ -3,38 +3,40 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="10dp"
-    android:background="#222222">
+    android:background="@color/module_panel_bg">
 
     <TextView
-        android:id="@+id/game_status"
+        android:id="@+id/process_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#00FF00"
+        android:textColor="@color/status_injection_ok"
         android:textSize="12sp"
-        android:text="ATTACHED: (PID: 00000)"
+        android:text="@string/status_attached_process" 
         android:paddingBottom="10dp"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="1. スクリプトを選択"
+        android:text="1. Run Script (JS Engine)"
         android:onClick="onScriptSelectClicked"
         android:background="#444444"
-        android:textColor="#FFFFFF"/>
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="5dp"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="2. メモリを検索 (Search)"
+        android:text="2. Access Memory Region"
         android:onClick="onMemorySearchClicked"
         android:background="#444444"
-        android:textColor="#FFFFFF"/>
-    
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="5dp"/>
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="閉じる"
+        android:text="3. Terminate Injector"
         android:onClick="onCloseClicked"
-        android:background="#444444"
-        android:textColor="#FFFFFF"/>
+        android:background="@color/alert_fatal"
+        android:textColor="@color/core_background"/>
 </LinearLayout>
