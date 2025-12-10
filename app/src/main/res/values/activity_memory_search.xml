@@ -1,0 +1,48 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#111111"
+    android:padding="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Memory Scan Console"
+        android:textColor="#00FF00"
+        android:textSize="18sp"/>
+
+    <EditText
+        android:id="@+id/search_value_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search Value (e.g., 9999)"
+        android:textColorHint="#999999"
+        android:textColor="#FFFFFF"
+        android:inputType="number"/>
+
+    <Button
+        android:id="@+id/search_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Search / First Scan"
+        android:onClick="onSearchClicked"
+        android:background="#444444"
+        android:textColor="#FFFFFF"/>
+
+    <ListView
+        android:id="@+id/results_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#222222"/>
+
+    <Button
+        android:id="@+id/refine_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Refine / Edit Selected"
+        android:onClick="onRefineClicked"
+        android:background="#444444"
+        android:textColor="#FFFFFF"/>
+</LinearLayout>
