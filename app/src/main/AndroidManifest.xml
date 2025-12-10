@@ -6,9 +6,9 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Ghost Hacker X"
+        android:label="Titan Core Injector" 
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        android:theme="@style/Theme.GhostHackerX"> 
 
         <activity android:name=".MainActivity"
             android:exported="true">
@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".FloatingService" />
+        <service android:name=".InjectionService" /> 
         <activity android:name=".MainMenuActivity" android:theme="@android:style/Theme.Dialog"/>
         <activity android:name=".MemorySearchActivity" />
         <activity android:name=".ScriptExecutorActivity" />
