@@ -8,7 +8,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Titan Core Injector" 
         android:supportsRtl="true"
-        android:theme="@style/Theme.GhostHackerX"> 
+        android:theme="@style/Theme.TCI.Console"> 
 
         <activity android:name=".MainActivity"
             android:exported="true">
@@ -19,7 +19,7 @@
         </activity>
 
         <service android:name=".InjectionService" /> 
-        <activity android:name=".MainMenuActivity" android:theme="@android:style/Theme.Dialog"/>
+        <activity android:name=".MainMenuActivity" android:theme="@style/Theme.TCI.FloatingModule"/>
         <activity android:name=".MemorySearchActivity" />
         <activity android:name=".ScriptExecutorActivity" />
     </application>
