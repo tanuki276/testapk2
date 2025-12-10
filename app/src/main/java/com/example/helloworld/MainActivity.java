@@ -1,27 +1,39 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ggfake.app">
+package com.ghosthacker.app;
 
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.INTERNET" />
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="Ghost Hacker X"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+public class MainActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         
-        <activity android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        Button launchButton = findViewById(R.id.launch_button);
+        launchButton.setOnClickListener(this::launchFloatingIcon);
+    }
 
-        <service android:name=".FloatingService" />
-        <activity android:name=".MainMenuActivity" android:theme="@android:style/Theme.Dialog"/>
-        <activity android:name=".MemorySearchActivity" />
-        <activity android:name=".ScriptExecutorActivity" />
-    </application>
-</manifest>
+    public void launchFloatingIcon(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            Toast.makeText(this, "FATAL: DRAW_OVERLAY permission required for stealth mode.", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, 1234);
+        } else {
+            startFloatingService();
+        }
+    }
+
+    private void startFloatingService() {
+        Toast.makeText(this, "System Overlay initiated. Hooking to WindowManager...", Toast.LENGTH_SHORT).show();
+        startService(new Intent(this, FloatingService.class));
+        finish();
+    }
+}
