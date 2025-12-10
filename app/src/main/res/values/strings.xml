@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">HelloWorld</string>
-    <string name="hello_world">Hello, World</string>
+    <string name="app_name">Ghost Hacker X</string>
+    <string name="title_system_console">System Console</string>
+    <string name="title_memory_scan">Memory Injection Interface</string>
+    <string name="status_attached_process">Process Hook Established</string>
+    <string name="status_stealth_mode">Stealth Mode Active</string>
+    <string name="button_launch_icon">Initialize Overlay Service</string>
+    <string name="error_fatal_permission">FATAL: SYSTEM_OVERLAY permission required.</string>
 </resources>
