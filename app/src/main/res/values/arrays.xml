@@ -1,0 +1,33 @@
+<resources>
+    <string-array name="target_processes">
+        <item>None Selected (PID: 0)</item>
+        <item>TargetGame_A (PID: 12457)</item>
+        <item>SystemUI (PID: 345)</item>
+        <item>GameApp_B (PID: 90210)</item>
+        <item>TargetGame_C (PID: 5501)</item>
+    </string-array>
+
+    <string-array name="data_types">
+        <item>Dword (4 Byte)</item>
+        <item>Float (4 Byte)</item>
+        <item>Double (8 Byte)</item>
+        <item>Byte (1 Byte)</item>
+        <item>String (UTF-8)</item>
+        <item>All Types</item>
+    </string-array>
+
+    <string-array name="search_types">
+        <item>Equal To (=)</item>
+        <item>Not Equal To (!=)</item>
+        <item>Greater Than (>)</item>
+        <item>Less Than (<)</item>
+        <item>Fuzzy (Near)</item>
+    </string-array>
+
+    <string-array name="refine_filters">
+        <item>Value Unchanged</item>
+        <item>Value Increased</item>
+        <item>Value Decreased</item>
+        <item>Value Changed</item>
+    </string-array>
+</resources>
