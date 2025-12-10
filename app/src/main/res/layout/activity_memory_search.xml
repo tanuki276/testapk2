@@ -2,30 +2,54 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#111111"
+    android:background="@color/module_panel_bg"
     android:padding="10dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Memory Scan Console"
-        android:textColor="#00FF00"
+        android:text="@string/title_memory_scan" 
+        android:textColor="@color/core_text_primary"
         android:textSize="18sp"/>
 
     <EditText
         android:id="@+id/search_value_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search Value (e.g., 9999)"
-        android:textColorHint="#999999"
-        android:textColor="#FFFFFF"
-        android:inputType="number"/>
+        android:hint="Value or Range (e.g., 9999 or 100~200)"
+        android:textColorHint="@color/core_text_secondary"
+        android:textColor="@color/core_text_primary"
+        android:inputType="text"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Spinner
+            android:id="@+id/data_type_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:entries="@array/data_types"
+            android:background="#333333"/>
+            
+        <Spinner
+            android:id="@+id/search_type_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:entries="@array/search_types"
+            android:background="#333333"/>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/search_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search / First Scan"
+        android:text="First Scan / Search"
         android:onClick="onSearchClicked"
         android:background="#444444"
         android:textColor="#FFFFFF"/>
@@ -35,14 +59,39 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#222222"/>
+        android:background="@color/core_background"/>
 
-    <Button
-        android:id="@+id/refine_button"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Refine / Edit Selected"
-        android:onClick="onRefineClicked"
-        android:background="#444444"
-        android:textColor="#FFFFFF"/>
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/refine_filter_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:entries="@array/refine_filters"
+            android:background="#333333"/>
+
+        <Button
+            android:id="@+id/refine_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Refine"
+            android:onClick="onRefineClicked"
+            android:background="#444444"
+            android:textColor="#FFFFFF"/>
+            
+        <Button
+            android:id="@+id/freeze_dump_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Freeze/DUMP" 
+            android:onClick="onFreezeDumpClicked"
+            android:background="@color/alert_fatal"
+            android:textColor="@color/core_background"/>
+    </LinearLayout>
 </LinearLayout>
