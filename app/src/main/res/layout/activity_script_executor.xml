@@ -2,29 +2,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#000000"
+    android:background="@color/core_background"
     android:padding="10dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Script Execution Console"
-        android:textColor="#00FF00"
+        android:text="TCI Script Engine Interface"
+        android:textColor="@color/core_text_primary"
         android:textSize="18sp"/>
 
-    <WebView
-        android:id="@+id/script_webview"
+    <TextView
+        android:id="@+id/script_path_display"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/core_text_secondary"
+        android:text="Selected File: [NO SCRIPT LOADED]"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/script_console_output"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="10dp"
-        android:background="#111111"/>
+        android:background="@color/module_panel_bg"
+        android:fontFamily="monospace"
+        android:textColor="@color/core_text_primary"
+        android:text="[TCI Console Log]\n> Script Engine Ready."/>
+
+    <Button
+        android:id="@+id/select_script_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select .js File"
+        android:background="#444444"
+        android:textColor="#FFFFFF"/>
 
     <Button
         android:id="@+id/execute_script_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Execute Script"
-        android:background="#FF0000"
-        android:textColor="#FFFFFF"/>
+        android:text="Execute Injection Script"
+        android:background="@color/alert_fatal"
+        android:textColor="@color/core_background"/>
 </LinearLayout>
