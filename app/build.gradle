@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.ghosthacker.app'
+    namespace 'com.tci.injector'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.ghosthacker.app"
+        applicationId "com.tci.injector"
         minSdk 24
         targetSdk 34
         versionCode 1
