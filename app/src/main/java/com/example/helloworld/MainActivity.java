@@ -1,12 +1,27 @@
-package com.example.helloworld;
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ggfake.app">
 
-import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-public class MainActivity extends AppCompatActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-    }
-}
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Ghost Hacker X"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        
+        <activity android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service android:name=".FloatingService" />
+        <activity android:name=".MainMenuActivity" android:theme="@android:style/Theme.Dialog"/>
+        <activity android:name=".MemorySearchActivity" />
+        <activity android:name=".ScriptExecutorActivity" />
+    </application>
+</manifest>
