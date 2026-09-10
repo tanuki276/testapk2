@@ -3,49 +3,66 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/core_background"
-    android:padding="10dp">
+    android:padding="12dp">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TCI Script Engine Interface"
-        android:textColor="@color/core_text_primary"
-        android:textSize="18sp"/>
+        android:text="SCRIPT LAB"
+        android:textColor="@color/accent_cyan"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:text="Dry-run JavaScript console · execution is simulated"
+        android:textColor="@color/core_text_secondary"
+        android:textSize="11sp" />
 
     <TextView
         android:id="@+id/script_path_display"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/core_surface"
+        android:gravity="center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:textColor="@color/core_text_secondary"
-        android:text="Selected File: [NO SCRIPT LOADED]"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:textSize="12sp"/>
+        android:text="SCRIPT  ·  [NO FILE SELECTED]"
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/script_console_output"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="10dp"
-        android:background="@color/module_panel_bg"
+        android:layout_marginTop="8dp"
+        android:background="@color/core_surface"
         android:fontFamily="monospace"
+        android:padding="12dp"
         android:textColor="@color/core_text_primary"
-        android:text="[TCI Console Log]\n> Script Engine Ready."/>
+        android:textSize="12sp"
+        android:text="TITAN SCRIPT CONSOLE\n────────────────────────\n[READY] Dry-run engine initialized.\n[SAFE] No external process access.\n> _" />
 
     <Button
         android:id="@+id/select_script_button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select .js File"
-        android:background="#444444"
-        android:textColor="#FFFFFF"/>
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:text="SELECT SCRIPT"
+        android:background="@color/core_surface_2"
+        android:textColor="@color/core_text_primary" />
 
     <Button
         android:id="@+id/execute_script_button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Execute Injection Script"
-        android:background="@color/alert_fatal"
-        android:textColor="@color/core_background"/>
+        android:layout_height="48dp"
+        android:layout_marginTop="6dp"
+        android:text="RUN DRY TEST"
+        android:background="@color/accent_cyan"
+        android:textColor="@color/core_background"
+        android:textStyle="bold" />
 </LinearLayout>
