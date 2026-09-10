@@ -1,8 +1,14 @@
 <resources>
-    <color name="core_background">#000000</color>
-    <color name="core_text_primary">#00FF00</color>
-    <color name="core_text_secondary">#AAAAAA</color>
-    <color name="alert_fatal">#FF0000</color>
-    <color name="status_injection_ok">#00CC00</color>
-    <color name="module_panel_bg">#111111</color>
+    <color name="core_background">#0A0E12</color>
+    <color name="core_surface">#121820</color>
+    <color name="core_surface_2">#18212B</color>
+    <color name="core_border">#2A3948</color>
+    <color name="core_text_primary">#E8F0F7</color>
+    <color name="core_text_secondary">#8FA1B3</color>
+    <color name="accent_cyan">#36D1DC</color>
+    <color name="accent_green">#5BE58B</color>
+    <color name="accent_amber">#F5B942</color>
+    <color name="alert_fatal">#E85D75</color>
+    <color name="status_injection_ok">#5BE58B</color>
+    <color name="module_panel_bg">#121820</color>
 </resources>
