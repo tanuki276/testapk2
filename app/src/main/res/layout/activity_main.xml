@@ -1,44 +1,113 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center"
-    android:background="@color/core_background"> 
+    android:background="@color/core_background">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/app_name" 
-        android:textSize="20sp"
-        android:textColor="@color/core_text_primary" 
-        android:layout_marginBottom="30dp"/>
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Select Target Process:"
-        android:textColor="@color/core_text_secondary"
-        android:layout_marginTop="20dp"/>
-        
-    <Spinner
-        android:id="@+id/target_spinner"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:entries="@array/target_processes"
-        android:background="@color/module_panel_bg"
-        android:popupBackground="@color/core_background"
-        android:prompt="@string/select_target"
-        android:layout_marginBottom="30dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TITAN CORE"
+            android:textColor="@color/accent_cyan"
+            android:textSize="12sp"
+            android:letterSpacing="0.18"
+            android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/attach_button"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:text="Attach Core (Inject Service)" 
-        android:onClick="onAttachClicked"
-        android:background="@color/alert_fatal"
-        android:textColor="@color/core_background"/> 
-        
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Injector Console"
+            android:textColor="@color/core_text_primary"
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Professional-looking sandbox for testing the UI flow. No real process memory is modified."
+            android:textColor="@color/core_text_secondary"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@color/core_surface"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="SESSION"
+                android:textColor="@color/core_text_secondary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="●  SAFE SIMULATION MODE"
+                android:textColor="@color/accent_green"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Local mock data only · Attach flow is simulated"
+                android:textColor="@color/core_text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="TARGET PROCESS"
+            android:textColor="@color/core_text_secondary"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/target_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/core_surface_2"
+            android:entries="@array/target_processes"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:popupBackground="@color/core_surface"
+            android:prompt="@string/select_target" />
+
+        <Button
+            android:id="@+id/attach_button"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="14dp"
+            android:background="@color/accent_cyan"
+            android:onClick="onAttachClicked"
+            android:text="ATTACH TO SANDBOX"
+            android:textColor="@color/core_background"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:gravity="center"
+            android:text="v0.2  •  UI prototype  •  memory operations are simulated"
+            android:textColor="@color/core_text_secondary"
+            android:textSize="11sp" />
+    </LinearLayout>
+</ScrollView>
