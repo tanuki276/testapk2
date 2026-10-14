@@ -17,23 +17,171 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.Arrays;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Small GameGuardian-style popup layer for Lua scripts.
- * It uses Android overlay windows, so the host app can stay in the background.
+ * Floating Lua UI layer. Standard one-shot dialogs are kept for compatibility,
+ * while toggleMenu provides a persistent menu whose rows change color in place.
  */
 public final class LuaOverlayUi {
+    private static final int TOGGLE_CLOSE_EVENT = -1;
+
     private final Context context;
     private final WindowManager windowManager;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private View activeView;
 
+    private LinearLayout toggleMenuCard;
+    private TextView toggleMenuTitle;
+    private TextView toggleMenuStatus;
+    private Button[] toggleButtons;
+    private String[] toggleLabels;
+    private boolean[] toggleStates;
+    private final BlockingQueue<Integer> toggleEvents = new LinkedBlockingQueue<>();
+
     public LuaOverlayUi(Context context) {
         this.context = context.getApplicationContext();
         this.windowManager = (WindowManager) this.context.getSystemService(Context.WINDOW_SERVICE);
+    }
+
+    public void showToast(String message) {
+        mainHandler.post(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Persistent colored toggle menu.
+     * The window remains visible after a row is tapped. The selected zero-based
+     * index is returned to Lua so the script can perform its action, then call
+     * this method again with updated states. Closing the X returns null.
+     */
+    public Integer showToggleMenu(String title, String[] items, boolean[] states) {
+        CountDownLatch ready = new CountDownLatch(1);
+
+        mainHandler.post(() -> {
+            boolean needsCreate = toggleMenuCard == null
+                    || toggleButtons == null
+                    || toggleLabels == null
+                    || !Arrays.equals(toggleLabels, items);
+
+            if (needsCreate) {
+                createToggleMenu(title, items, states);
+            } else {
+                if (toggleMenuTitle != null) {
+                    toggleMenuTitle.setText(title == null || title.isEmpty() ? "脚本菜单" : title);
+                }
+                syncToggleStates(states);
+            }
+            ready.countDown();
+        });
+
+        await(ready);
+
+        try {
+            int event = toggleEvents.take();
+            return event == TOGGLE_CLOSE_EVENT ? null : event;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
+
+    private void createToggleMenu(String title, String[] items, boolean[] states) {
+        removeActiveInternal(false);
+        toggleEvents.clear();
+        toggleLabels = items.clone();
+        toggleStates = new boolean[items.length];
+        if (states != null) {
+            System.arraycopy(states, 0, toggleStates, 0, Math.min(states.length, toggleStates.length));
+        }
+
+        LinearLayout card = createCard();
+        toggleMenuCard = card;
+
+        LinearLayout header = new LinearLayout(context);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+
+        TextView titleView = new TextView(context);
+        titleView.setText(title == null || title.isEmpty() ? "脚本菜单" : title);
+        titleView.setTextColor(0xFF42D5E8);
+        titleView.setTextSize(18);
+        titleView.setGravity(Gravity.CENTER_VERTICAL);
+        toggleMenuTitle = titleView;
+        header.addView(titleView, new LinearLayout.LayoutParams(0, dp(44), 1f));
+
+        Button close = createActionButton("×");
+        LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams(dp(46), dp(40));
+        close.setOnClickListener(v -> {
+            removeActiveInternal(false);
+            toggleEvents.offer(TOGGLE_CLOSE_EVENT);
+        });
+        header.addView(close, closeParams);
+        card.addView(header, matchWrap(0));
+
+        ScrollView scroll = new ScrollView(context);
+        LinearLayout list = new LinearLayout(context);
+        list.setOrientation(LinearLayout.VERTICAL);
+        toggleButtons = new Button[items.length];
+
+        for (int i = 0; i < items.length; i++) {
+            final int index = i;
+            Button item = createMenuButton(items[i]);
+            applyToggleStyle(item, toggleStates[i]);
+            item.setOnClickListener(v -> {
+                boolean next = !toggleStates[index];
+                toggleStates[index] = next;
+                applyToggleStyle(toggleButtons[index], next);
+                if (toggleMenuStatus != null) {
+                    toggleMenuStatus.setText(items[index] + (next ? "  ·  已开启" : "  ·  已关闭"));
+                    toggleMenuStatus.setTextColor(next ? 0xFF62E69A : 0xFFA7B2C2);
+                }
+                toggleEvents.offer(index);
+            });
+            toggleButtons[i] = item;
+            list.addView(item, matchWrap(7));
+        }
+
+        scroll.addView(list);
+        card.addView(scroll, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(360)));
+
+        TextView status = new TextView(context);
+        status.setText("点击项目直接切换 · × 隐藏菜单");
+        status.setTextColor(0xFFA7B2C2);
+        status.setTextSize(12);
+        status.setPadding(dp(4), dp(10), dp(4), dp(2));
+        toggleMenuStatus = status;
+        card.addView(status, matchWrap(0));
+
+        activeView = card;
+        windowManager.addView(card, createParams());
+    }
+
+    private void syncToggleStates(boolean[] states) {
+        if (toggleButtons == null || toggleStates == null) return;
+        for (int i = 0; i < toggleButtons.length; i++) {
+            boolean enabled = states != null && i < states.length && states[i];
+            toggleStates[i] = enabled;
+            applyToggleStyle(toggleButtons[i], enabled);
+        }
+    }
+
+    private void applyToggleStyle(Button button, boolean enabled) {
+        if (button == null) return;
+        if (enabled) {
+            button.setBackground(roundRect(0xFF176B46, 10, 0xFF43D88A));
+            button.setTextColor(Color.WHITE);
+        } else {
+            button.setBackground(roundRect(0xFF1B2430, 10, 0xFF2C394A));
+            button.setTextColor(0xFFE9EEF5);
+        }
     }
 
     public Integer showChoice(String title, String[] items, int selected) {
@@ -55,7 +203,7 @@ public final class LuaOverlayUi {
                 if (i == selected) item.setText("✓  " + items[i]);
                 item.setOnClickListener(v -> {
                     result.set(index);
-                    removeActive();
+                    removeActiveInternal(false);
                     latch.countDown();
                 });
                 list.addView(item, matchWrap(8));
@@ -105,14 +253,14 @@ public final class LuaOverlayUi {
             Button cancel = createActionButton("取消");
             Button ok = createActionButton("确定");
             cancel.setOnClickListener(v -> {
-                removeActive();
+                removeActiveInternal(false);
                 latch.countDown();
             });
             ok.setOnClickListener(v -> {
                 boolean[] values = new boolean[checks.length];
                 for (int i = 0; i < checks.length; i++) values[i] = checks[i].isChecked();
                 result.set(values);
-                removeActive();
+                removeActiveInternal(false);
                 latch.countDown();
             });
             actions.addView(cancel, weighted());
@@ -158,14 +306,14 @@ public final class LuaOverlayUi {
             Button cancel = createActionButton("取消");
             Button ok = createActionButton("确定");
             cancel.setOnClickListener(v -> {
-                removeActive();
+                removeActiveInternal(false);
                 latch.countDown();
             });
             ok.setOnClickListener(v -> {
                 String[] values = new String[fields.length];
                 for (int i = 0; i < fields.length; i++) values[i] = fields[i].getText().toString();
                 result.set(values);
-                removeActive();
+                removeActiveInternal(false);
                 latch.countDown();
             });
             actions.addView(cancel, weighted());
@@ -196,7 +344,7 @@ public final class LuaOverlayUi {
                 Button no = createActionButton(negative);
                 no.setOnClickListener(v -> {
                     result.set(2);
-                    removeActive();
+                    removeActiveInternal(false);
                     latch.countDown();
                 });
                 actions.addView(no, weighted());
@@ -205,7 +353,7 @@ public final class LuaOverlayUi {
             Button yes = createActionButton(positive == null || positive.isEmpty() ? "OK" : positive);
             yes.setOnClickListener(v -> {
                 result.set(1);
-                removeActive();
+                removeActiveInternal(false);
                 latch.countDown();
             });
             actions.addView(yes, weighted());
@@ -218,11 +366,11 @@ public final class LuaOverlayUi {
     }
 
     public void dismissActive() {
-        mainHandler.post(this::removeActive);
+        mainHandler.post(() -> removeActiveInternal(true));
     }
 
     private void show(View view) {
-        removeActive();
+        removeActiveInternal(true);
         activeView = view;
         windowManager.addView(view, createParams());
     }
@@ -286,7 +434,7 @@ public final class LuaOverlayUi {
     private void addCancel(LinearLayout card, CountDownLatch latch) {
         Button close = createActionButton("关闭");
         close.setOnClickListener(v -> {
-            removeActive();
+            removeActiveInternal(false);
             latch.countDown();
         });
         card.addView(close, matchWrap(10));
@@ -320,13 +468,25 @@ public final class LuaOverlayUi {
         return drawable;
     }
 
-    private void removeActive() {
-        if (activeView == null) return;
-        try {
-            windowManager.removeView(activeView);
-        } catch (IllegalArgumentException ignored) {
+    private void removeActiveInternal(boolean signalToggleClose) {
+        boolean wasToggle = activeView != null && activeView == toggleMenuCard;
+        if (activeView != null) {
+            try {
+                windowManager.removeView(activeView);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
         activeView = null;
+
+        if (wasToggle) {
+            toggleMenuCard = null;
+            toggleMenuTitle = null;
+            toggleMenuStatus = null;
+            toggleButtons = null;
+            toggleLabels = null;
+            toggleStates = null;
+            if (signalToggleClose) toggleEvents.offer(TOGGLE_CLOSE_EVENT);
+        }
     }
 
     private int dp(int value) {
