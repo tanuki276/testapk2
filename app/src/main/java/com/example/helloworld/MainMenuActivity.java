@@ -16,8 +16,8 @@ public class MainMenuActivity extends Activity {
 
         TextView status = findViewById(R.id.process_status);
         String targetProcess = getIntent().getStringExtra("TARGET_PROCESS");
-        if (targetProcess == null || targetProcess.trim().isEmpty()) targetProcess = "Synthetic Demo Game";
-        status.setText("TARGET  ·  " + targetProcess + "  ·  SAFE SIMULATION");
+        if (targetProcess == null || targetProcess.trim().isEmpty()) targetProcess = "Local Session";
+        status.setText("TARGET  ·  " + targetProcess + "  ·  ACTIVE");
     }
 
     public void onMemorySearchClicked(View view) {
@@ -35,10 +35,12 @@ public class MainMenuActivity extends Activity {
     }
 
     public void onSettingsClicked(View view) {
-        Toast.makeText(this, "Simulator settings: floating icon + synthetic memory only", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Overlay and script settings", Toast.LENGTH_SHORT).show();
     }
 
     public void onCloseClicked(View view) {
+        // Close only the panel. The floating icon service stays alive so the
+        // user can continue using the foreground app and reopen the panel later.
         finish();
     }
 
