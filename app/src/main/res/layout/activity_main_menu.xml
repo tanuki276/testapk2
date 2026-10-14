@@ -1,71 +1,109 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="320dp"
+    android:layout_width="340dp"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@color/core_surface"
-    android:padding="16dp">
+    android:padding="14dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TITAN CORE / CONTROL"
-        android:textColor="@color/accent_cyan"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.12" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TITAN GUARD"
+            android:textColor="@color/accent_cyan"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:layout_width="44dp"
+            android:layout_height="40dp"
+            android:background="@color/core_surface_2"
+            android:onClick="onCloseClicked"
+            android:text="×"
+            android:textColor="@color/core_text_primary"
+            android:textSize="18sp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/process_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textColor="@color/status_injection_ok"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:text="SANDBOX READY" />
+        android:layout_marginTop="6dp"
+        android:text="TARGET · Synthetic Demo Game · SAFE SIMULATION"
+        android:textColor="@color/accent_green"
+        android:textSize="11sp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="14dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:background="@color/core_border" />
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="01  SCRIPT LAB"
-        android:onClick="onScriptSelectClicked"
+        android:layout_height="46dp"
+        android:layout_marginBottom="7dp"
         android:background="@color/core_surface_2"
-        android:textColor="@color/core_text_primary"
         android:gravity="start|center_vertical"
-        android:paddingStart="14dp"
-        android:layout_marginBottom="8dp" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="02  MEMORY LAB"
         android:onClick="onMemorySearchClicked"
-        android:background="@color/core_surface_2"
-        android:textColor="@color/core_text_primary"
-        android:gravity="start|center_vertical"
         android:paddingStart="14dp"
-        android:layout_marginBottom="8dp" />
+        android:text="⌕   SEARCH / REFINE"
+        android:textColor="@color/core_text_primary" />
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="03  CLOSE CONSOLE"
-        android:onClick="onCloseClicked"
+        android:layout_height="46dp"
+        android:layout_marginBottom="7dp"
+        android:background="@color/core_surface_2"
+        android:gravity="start|center_vertical"
+        android:onClick="onSavedListClicked"
+        android:paddingStart="14dp"
+        android:text="★   SAVED LIST"
+        android:textColor="@color/core_text_primary" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginBottom="7dp"
+        android:background="@color/core_surface_2"
+        android:gravity="start|center_vertical"
+        android:onClick="onScriptSelectClicked"
+        android:paddingStart="14dp"
+        android:text="▶   EXECUTE LUA SCRIPT"
+        android:textColor="@color/core_text_primary" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginBottom="7dp"
+        android:background="@color/core_surface_2"
+        android:gravity="start|center_vertical"
+        android:onClick="onSettingsClicked"
+        android:paddingStart="14dp"
+        android:text="⚙   SETTINGS"
+        android:textColor="@color/core_text_primary" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginTop="3dp"
         android:background="@color/alert_fatal"
+        android:onClick="onStopOverlayClicked"
+        android:text="STOP FLOATING TOOL"
         android:textColor="@color/core_text_primary" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="All operations are local simulations."
+        android:layout_marginTop="10dp"
+        android:text="All addresses, values and edits are synthetic."
         android:textColor="@color/core_text_secondary"
-        android:textSize="11sp" />
+        android:textSize="10sp" />
 </LinearLayout>
