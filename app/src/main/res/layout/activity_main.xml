@@ -12,7 +12,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TITAN CORE"
+            android:text="TITAN GUARD"
             android:textColor="@color/accent_cyan"
             android:textSize="12sp"
             android:letterSpacing="0.18"
@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Injector Console"
+            android:text="Memory Tool Simulator"
             android:textColor="@color/core_text_primary"
             android:textSize="28sp"
             android:textStyle="bold" />
@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:text="Professional-looking sandbox for testing the UI flow. No real process memory is modified."
+            android:text="GameGuardian-style workflow recreated with synthetic in-app memory only."
             android:textColor="@color/core_text_secondary"
             android:textSize="13sp" />
 
@@ -46,7 +46,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="SESSION"
+                android:text="SAFE MODE"
                 android:textColor="@color/core_text_secondary"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -55,7 +55,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="●  SAFE SIMULATION MODE"
+                android:text="●  SYNTHETIC MEMORY ONLY"
                 android:textColor="@color/accent_green"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -64,49 +64,46 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Local mock data only · Attach flow is simulated"
+                android:text="No root · no process attachment · no external memory access"
                 android:textColor="@color/core_text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="TARGET PROCESS"
-            android:textColor="@color/core_text_secondary"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/target_spinner"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
-            android:background="@color/core_surface_2"
-            android:entries="@array/target_processes"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:popupBackground="@color/core_surface"
-            android:prompt="@string/select_target" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="Like the reference app, Start creates a draggable floating icon. Tap it to open Search, Saved and Lua tools."
+            android:textColor="@color/core_text_secondary"
+            android:textSize="12sp" />
 
         <Button
-            android:id="@+id/attach_button"
+            android:id="@+id/start_overlay_button"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="14dp"
+            android:layout_height="54dp"
+            android:layout_marginTop="16dp"
             android:background="@color/accent_cyan"
-            android:onClick="onAttachClicked"
-            android:text="ATTACH TO SANDBOX"
+            android:onClick="onStartOverlayClicked"
+            android:text="START FLOATING TOOL"
             android:textColor="@color/core_background"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/open_panel_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/core_surface_2"
+            android:onClick="onOpenPanelClicked"
+            android:text="OPEN TOOL PANEL"
+            android:textColor="@color/core_text_primary" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:gravity="center"
-            android:text="v0.2  •  UI prototype  •  memory operations are simulated"
+            android:text="Simulation build · values and addresses exist only inside this app"
             android:textColor="@color/core_text_secondary"
             android:textSize="11sp" />
     </LinearLayout>

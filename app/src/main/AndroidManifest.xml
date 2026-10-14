@@ -1,16 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Titan Core Injector" 
+        android:label="Titan Guard"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TCI.Console"> 
+        android:theme="@style/Theme.TCI.Console">
 
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,9 +18,22 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".InjectionService" /> 
-        <activity android:name=".MainMenuActivity" android:theme="@style/Theme.TCI.FloatingModule"/>
-        <activity android:name=".MemorySearchActivity" />
-        <activity android:name=".ScriptExecutorActivity" />
+        <service
+            android:name=".InjectionService"
+            android:exported="false" />
+
+        <!-- GG-style surfaces stay visually on top of the currently open app. -->
+        <activity
+            android:name=".MainMenuActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TCI.FloatingModule" />
+        <activity
+            android:name=".MemorySearchActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TCI.FloatingModule" />
+        <activity
+            android:name=".ScriptExecutorActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TCI.FloatingModule" />
     </application>
 </manifest>
