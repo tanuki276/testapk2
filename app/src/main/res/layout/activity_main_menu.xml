@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:text="TARGET · Synthetic Demo Game · SAFE SIMULATION"
+        android:text="TARGET · Local Session · ACTIVE"
         android:textColor="@color/accent_green"
         android:textSize="11sp" />
 
@@ -103,7 +103,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="All addresses, values and edits are synthetic."
+        android:text="Tap × to return to the current app. Use the floating icon to reopen."
         android:textColor="@color/core_text_secondary"
         android:textSize="10sp" />
 </LinearLayout>
