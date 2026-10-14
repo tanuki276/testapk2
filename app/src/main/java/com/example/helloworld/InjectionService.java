@@ -11,19 +11,17 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.tci.injector.R;
-
-public class InjectionService extends Service { // クラス名を変更
+public class InjectionService extends Service {
     private WindowManager windowManager;
     private ImageView floatingIcon;
     private WindowManager.LayoutParams params;
-    
-    // ターゲットプロセス情報を保持
     private String targetProcess;
     private String targetPid;
 
     @Override
-    public IBinder onBind(Intent intent) { return null; }
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -31,82 +29,85 @@ public class InjectionService extends Service { // クラス名を変更
             targetProcess = intent.getStringExtra("TARGET_PROCESS");
             targetPid = intent.getStringExtra("TARGET_PID");
         }
-        return super.onStartCommand(intent, flags, startId);
+        return START_NOT_STICKY;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        
         floatingIcon = new ImageView(this);
-        // アイコンをアプリのランチャーアイコンに変更
-        floatingIcon.setImageResource(R.mipmap.ic_launcher); 
+        floatingIcon.setImageResource(R.mipmap.ic_launcher);
+        floatingIcon.setContentDescription("Open Titan Guard simulator");
 
-        // パラメータの設定 (サイズを小さくする)
-        int iconSize = (int) (getResources().getDisplayMetrics().density * 48); // 48dp
-        
+        int iconSize = (int) (getResources().getDisplayMetrics().density * 48);
         params = new WindowManager.LayoutParams(
-            iconSize, // WRAP_CONTENT から固定サイズに変更
-            iconSize, // WRAP_CONTENT から固定サイズに変更
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, 
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        );
+                iconSize,
+                iconSize,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
 
-        params.gravity = Gravity.TOP | Gravity.LEFT;
+        params.gravity = Gravity.TOP | Gravity.START;
         params.x = 0;
         params.y = 100;
-
         windowManager.addView(floatingIcon, params);
 
         floatingIcon.setOnTouchListener(new View.OnTouchListener() {
-            private int initialX, initialY;
-            private float initialTouchX, initialTouchY;
-            private long touchStartTime;
-            private boolean isClick;
-            
-            // GG風: 長押し判定用の変数
-            private static final int CLICK_DURATION_MS = 200;
-            private static final int LONG_PRESS_DURATION_MS = 1000; 
+            private static final int CLICK_DURATION_MS = 250;
+            private static final int LONG_PRESS_DURATION_MS = 700;
+            private static final float MOVE_THRESHOLD_PX = 12f;
 
-            @Override public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
+            private int initialX;
+            private int initialY;
+            private float initialTouchX;
+            private float initialTouchY;
+            private long touchStartTime;
+            private boolean moved;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         initialX = params.x;
                         initialY = params.y;
                         initialTouchX = event.getRawX();
                         initialTouchY = event.getRawY();
                         touchStartTime = System.currentTimeMillis();
-                        isClick = true;
+                        moved = false;
                         return true;
+
                     case MotionEvent.ACTION_MOVE:
-                        // 移動距離が閾値を超えたらクリックではないと判定し、アイコンを移動
-                        if (Math.abs(event.getRawX() - initialTouchX) > 10 || Math.abs(event.getRawY() - initialTouchY) > 10) {
-                            params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                            params.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        float dx = event.getRawX() - initialTouchX;
+                        float dy = event.getRawY() - initialTouchY;
+                        if (Math.abs(dx) > MOVE_THRESHOLD_PX || Math.abs(dy) > MOVE_THRESHOLD_PX) {
+                            moved = true;
+                            params.x = initialX + (int) dx;
+                            params.y = initialY + (int) dy;
                             windowManager.updateViewLayout(floatingIcon, params);
-                            isClick = false; 
                         }
                         return true;
+
                     case MotionEvent.ACTION_UP:
                         long duration = System.currentTimeMillis() - touchStartTime;
-
-                        if (isClick && (duration < CLICK_DURATION_MS)) {
-                            // 短いタップ: GG風メニュー（MainMenuActivity）を起動
-                            Toast.makeText(getApplicationContext(), "TCI: Accessing Main Module.", Toast.LENGTH_SHORT).show();
-
-                            Intent intent = new Intent(getApplicationContext(), MainMenuActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            // ターゲット情報をメニューに渡す
-                            intent.putExtra("TARGET_PROCESS", targetProcess);
-                            intent.putExtra("TARGET_PID", targetPid);
-                            startActivity(intent);
-                        } else if (!isClick && duration > LONG_PRESS_DURATION_MS) {
-                            // 長押し（ゴミ箱機能シミュレーション）: サービスを停止
-                            Toast.makeText(getApplicationContext(), "TCI: Injection Service Terminated.", Toast.LENGTH_LONG).show();
-                            stopSelf();
+                        if (!moved && duration >= LONG_PRESS_DURATION_MS) {
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "Speed panel simulation · no game timing is changed",
+                                    Toast.LENGTH_SHORT).show();
+                            return true;
                         }
+
+                        if (!moved && duration < CLICK_DURATION_MS) {
+                            Intent panel = new Intent(getApplicationContext(), MainMenuActivity.class);
+                            panel.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            panel.putExtra("TARGET_PROCESS", targetProcess == null ? "Synthetic Demo Game" : targetProcess);
+                            panel.putExtra("TARGET_PID", targetPid == null ? "SIM" : targetPid);
+                            startActivity(panel);
+                        }
+                        return true;
+
+                    case MotionEvent.ACTION_CANCEL:
                         return true;
                 }
                 return false;
@@ -116,7 +117,12 @@ public class InjectionService extends Service { // クラス名を変更
 
     @Override
     public void onDestroy() {
+        if (floatingIcon != null && windowManager != null) {
+            try {
+                windowManager.removeView(floatingIcon);
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
         super.onDestroy();
-        if (floatingIcon != null) windowManager.removeView(floatingIcon);
     }
 }
