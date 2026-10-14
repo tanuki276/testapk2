@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SCRIPT LAB  /  H5GG STYLE"
+        android:text="SCRIPT LAB  /  LUA"
         android:textColor="@color/accent_cyan"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
-        android:text="Local JavaScript runner · SAFETY SANDBOX"
+        android:text="GG-style Lua runner · synthetic memory sandbox"
         android:textColor="@color/core_text_secondary"
         android:textSize="11sp" />
 
@@ -30,19 +30,19 @@
         android:gravity="center_vertical"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
-        android:text="SCRIPT  ·  [NO FILE SELECTED]"
+        android:text="LUA  ·  [NO FILE SELECTED]"
         android:textColor="@color/core_text_secondary"
         android:textSize="11sp" />
 
     <EditText
         android:id="@+id/script_editor"
         android:layout_width="match_parent"
-        android:layout_height="130dp"
+        android:layout_height="150dp"
         android:layout_marginTop="8dp"
         android:background="@color/core_surface"
         android:fontFamily="monospace"
         android:gravity="top|start"
-        android:hint="log('hello');\nsearch('100', 'I32');"
+        android:hint="gg.searchNumber('100', gg.TYPE_DWORD)\nlocal r = gg.getResults(10)\ngg.toast('found: '..#r)"
         android:inputType="textMultiLine|textNoSuggestions"
         android:padding="10dp"
         android:textColor="@color/core_text_primary"
@@ -60,14 +60,14 @@
         android:padding="10dp"
         android:textColor="@color/core_text_primary"
         android:textSize="11sp"
-        android:text="[READY] JavaScript sandbox\n[SAFE] No external process access\n> _" />
+        android:text="[READY] Lua sandbox\n[SAFE] Synthetic memory only\n> _" />
 
     <Button
         android:id="@+id/select_script_button"
         android:layout_width="match_parent"
         android:layout_height="44dp"
         android:layout_marginTop="8dp"
-        android:text="LOAD JS FILE"
+        android:text="LOAD LUA FILE"
         android:background="@color/core_surface_2"
         android:textColor="@color/core_text_primary" />
 
@@ -76,7 +76,7 @@
         android:layout_width="match_parent"
         android:layout_height="44dp"
         android:layout_marginTop="6dp"
-        android:text="RUN JAVASCRIPT"
+        android:text="RUN LUA"
         android:background="@color/accent_cyan"
         android:textColor="@color/core_background"
         android:textStyle="bold" />
