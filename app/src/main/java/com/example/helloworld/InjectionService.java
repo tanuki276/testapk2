@@ -4,12 +4,12 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 public class InjectionService extends Service {
     private WindowManager windowManager;
@@ -38,24 +38,24 @@ public class InjectionService extends Service {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         floatingIcon = new ImageView(this);
         floatingIcon.setImageResource(R.mipmap.ic_launcher);
-        floatingIcon.setContentDescription("Open Titan Guard simulator");
+        floatingIcon.setContentDescription("Open Titan Guard");
 
-        int iconSize = (int) (getResources().getDisplayMetrics().density * 48);
+        int iconSize = dp(48);
         params = new WindowManager.LayoutParams(
                 iconSize,
                 iconSize,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
 
         params.gravity = Gravity.TOP | Gravity.START;
-        params.x = 0;
-        params.y = 100;
+        params.x = dp(8);
+        params.y = dp(96);
         windowManager.addView(floatingIcon, params);
 
         floatingIcon.setOnTouchListener(new View.OnTouchListener() {
             private static final int CLICK_DURATION_MS = 250;
-            private static final int LONG_PRESS_DURATION_MS = 700;
             private static final float MOVE_THRESHOLD_PX = 12f;
 
             private int initialX;
@@ -84,26 +84,20 @@ public class InjectionService extends Service {
                             moved = true;
                             params.x = initialX + (int) dx;
                             params.y = initialY + (int) dy;
+                            clampToScreen();
                             windowManager.updateViewLayout(floatingIcon, params);
                         }
                         return true;
 
                     case MotionEvent.ACTION_UP:
                         long duration = System.currentTimeMillis() - touchStartTime;
-                        if (!moved && duration >= LONG_PRESS_DURATION_MS) {
-                            Toast.makeText(
-                                    getApplicationContext(),
-                                    "Speed panel simulation · no game timing is changed",
-                                    Toast.LENGTH_SHORT).show();
-                            return true;
-                        }
-
                         if (!moved && duration < CLICK_DURATION_MS) {
-                            Intent panel = new Intent(getApplicationContext(), MainMenuActivity.class);
-                            panel.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            panel.putExtra("TARGET_PROCESS", targetProcess == null ? "Synthetic Demo Game" : targetProcess);
-                            panel.putExtra("TARGET_PID", targetPid == null ? "SIM" : targetPid);
-                            startActivity(panel);
+                            if (LuaRuntimeState.isActive()) {
+                                // A running script is waiting for the floating icon.
+                                LuaRuntimeState.requestUi();
+                            } else {
+                                openMainPanel();
+                            }
                         }
                         return true;
 
@@ -115,8 +109,29 @@ public class InjectionService extends Service {
         });
     }
 
+    private void openMainPanel() {
+        Intent panel = new Intent(getApplicationContext(), MainMenuActivity.class);
+        panel.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        panel.putExtra("TARGET_PROCESS", targetProcess == null ? "Local Session" : targetProcess);
+        panel.putExtra("TARGET_PID", targetPid == null ? "LOCAL" : targetPid);
+        startActivity(panel);
+    }
+
+    private void clampToScreen() {
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+        int maxX = Math.max(0, dm.widthPixels - dp(48));
+        int maxY = Math.max(0, dm.heightPixels - dp(48));
+        params.x = Math.max(0, Math.min(params.x, maxX));
+        params.y = Math.max(0, Math.min(params.y, maxY));
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
     @Override
     public void onDestroy() {
+        LuaRuntimeState.setActive(false);
         if (floatingIcon != null && windowManager != null) {
             try {
                 windowManager.removeView(floatingIcon);
