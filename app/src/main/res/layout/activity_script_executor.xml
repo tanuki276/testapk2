@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SCRIPT LAB  /  LUA"
+        android:text="SCRIPT LAB / LUA"
         android:textColor="@color/accent_cyan"
         android:textSize="20sp"
         android:textStyle="bold" />
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
-        android:text="GG-style Lua runner · synthetic memory sandbox"
+        android:text="Lua script runner · floating menu integration"
         android:textColor="@color/core_text_secondary"
         android:textSize="11sp" />
 
@@ -42,7 +42,7 @@
         android:background="@color/core_surface"
         android:fontFamily="monospace"
         android:gravity="top|start"
-        android:hint="gg.searchNumber('100', gg.TYPE_DWORD)\nlocal r = gg.getResults(10)\ngg.toast('found: '..#r)"
+        android:hint="gg.setVisible(false)\nlocal menu = gg.choice({'Option 1','Option 2'}, nil, 'Menu')"
         android:inputType="textMultiLine|textNoSuggestions"
         android:padding="10dp"
         android:textColor="@color/core_text_primary"
@@ -60,7 +60,7 @@
         android:padding="10dp"
         android:textColor="@color/core_text_primary"
         android:textSize="11sp"
-        android:text="[READY] Lua sandbox\n[SAFE] Synthetic memory only\n> _" />
+        android:text="[READY] Lua engine\n[UI] Floating icon linked\n> _" />
 
     <Button
         android:id="@+id/select_script_button"
