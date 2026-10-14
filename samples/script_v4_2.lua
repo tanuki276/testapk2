@@ -2,77 +2,81 @@
 
 local TITLE = "脚本 v4.2"
 
-local function applyFeature(searchValue, newValue, label)
+local features = {
+    { name = "体力无限", search = 100, value = 999999, enabled = false },
+    { name = "武器连射", search = 200, value = 1, enabled = false },
+    { name = "空中浮游", search = 300, value = 777, enabled = false },
+    { name = "无限跳跃", search = 400, value = 9999, enabled = false },
+    { name = "高速移动", search = 500, value = 2500, enabled = false }
+}
+
+local labels = {
+    "❤️ 体力无限",
+    "🔫 武器连射",
+    "☁️ 空中浮游",
+    "🦘 无限跳跃",
+    "⚡ 高速移动"
+}
+
+local function states()
+    local out = {}
+    for i, f in ipairs(features) do out[i] = f.enabled end
+    return out
+end
+
+local function enableFeature(f)
     gg.clearResults()
-    gg.searchNumber(tostring(searchValue), gg.TYPE_DWORD)
+    gg.searchNumber(tostring(f.search), gg.TYPE_DWORD)
 
     local count = gg.getResultsCount()
     if count <= 0 then
-        gg.toast(label .. "：未找到目标值")
-        return
+        gg.toast("⚠️ " .. f.name .. "：未找到目标值")
+        return false
     end
 
     local results = gg.getResults(count)
     for i, item in ipairs(results) do
-        item.value = newValue
+        item.value = f.value
         item.freeze = true
     end
 
     gg.setValues(results)
     gg.addListItems(results)
-    gg.toast(label .. "：已开启")
-end
-
-local function mainMenu()
-    local menu = gg.choice({
-        "❤️ 体力无限",
-        "🔫 武器连射",
-        "☁️ 空中浮游",
-        "🦘 无限跳跃",
-        "⚡ 高速移动",
-        "🧩 全部开启",
-        "👁 隐藏菜单",
-        "❌ 退出脚本"
-    }, nil, TITLE)
-
-    if menu == nil or menu == 7 then
-        gg.setVisible(false)
-        return true
-    elseif menu == 1 then
-        applyFeature(100, 999999, "体力无限")
-    elseif menu == 2 then
-        applyFeature(200, 1, "武器连射")
-    elseif menu == 3 then
-        applyFeature(300, 777, "空中浮游")
-    elseif menu == 4 then
-        applyFeature(400, 9999, "无限跳跃")
-    elseif menu == 5 then
-        applyFeature(500, 2500, "高速移动")
-    elseif menu == 6 then
-        applyFeature(100, 999999, "体力无限")
-        applyFeature(200, 1, "武器连射")
-        applyFeature(300, 777, "空中浮游")
-        applyFeature(400, 9999, "无限跳跃")
-        applyFeature(500, 2500, "高速移动")
-        gg.toast("全部功能已开启")
-    elseif menu == 8 then
-        gg.toast("脚本已退出")
-        return false
-    end
-
+    f.enabled = true
+    gg.toast("✅ " .. f.name .. "：已开启")
     return true
 end
 
--- 第一次运行时直接显示菜单。
-local running = mainMenu()
-gg.setVisible(false)
+local function disableFeature(f)
+    -- Current simulator keeps the value but removes the local ON state.
+    -- The UI immediately returns to the disabled color.
+    f.enabled = false
+    gg.toast("⛔ " .. f.name .. "：已关闭")
+end
 
--- 菜单关闭后保持脚本运行。
--- 再次点击浮动图标时重新打开菜单。
-while running do
-    if gg.isVisible() then
-        gg.setVisible(false)
-        running = mainMenu()
+local function toggleFeature(f)
+    if f.enabled then
+        disableFeature(f)
+    else
+        enableFeature(f)
     end
-    gg.sleep(100)
+end
+
+local running = true
+
+while running do
+    local selected = gg.toggleMenu(labels, states(), TITLE)
+
+    -- X closes only the menu. Script stays alive and waits for the floating icon.
+    if selected == nil then
+        gg.setVisible(false)
+        while not gg.isVisible() do
+            gg.sleep(100)
+        end
+        gg.setVisible(false)
+    elseif selected >= 1 and selected <= #features then
+        toggleFeature(features[selected])
+        -- No menu recreation here: the same overlay stays open and the app
+        -- updates the tapped row's background color in place.
+    end
 end
