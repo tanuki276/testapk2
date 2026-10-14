@@ -52,7 +52,7 @@ public class ScriptExecutorActivity extends Activity {
 
         appendConsoleLine("[TITAN LUA]");
         appendConsoleLine("> Lua engine ready.");
-        appendConsoleLine("> GUI: gg.choice / gg.multiChoice / gg.prompt / gg.alert");
+        appendConsoleLine("> GUI: gg.choice / gg.toggleMenu / gg.multiChoice / gg.prompt / gg.alert");
         appendConsoleLine("> Floating icon controls script UI visibility.");
 
         selectScriptButton.setOnClickListener(this::selectScriptFile);
@@ -112,8 +112,6 @@ public class ScriptExecutorActivity extends Activity {
         executeScriptButton.setEnabled(false);
         appendConsoleLine("\n> [EXEC] Running Lua...");
 
-        // Match the usual floating-tool workflow: leave the host screen and let
-        // the script show only the popup it needs over the foreground app.
         LuaRuntimeState.setActive(true);
         LuaRuntimeState.hideUi();
         moveTaskToBack(true);
@@ -179,7 +177,7 @@ public class ScriptExecutorActivity extends Activity {
             @Override
             public Varargs invoke(Varargs args) {
                 String message = args.arg(1).optjstring("");
-                runOnUiThread(() -> Toast.makeText(ScriptExecutorActivity.this, message, Toast.LENGTH_SHORT).show());
+                overlayUi.showToast(message);
                 return LuaValue.NONE;
             }
         });
@@ -203,6 +201,30 @@ public class ScriptExecutorActivity extends Activity {
                 int selected = args.arg(2).isnil() ? -1 : Math.max(0, args.arg(2).optint(1) - 1);
                 String title = args.arg(3).optjstring("菜单");
                 Integer result = overlayUi.showChoice(title, items, selected);
+                return result == null ? LuaValue.NIL : LuaValue.valueOf(result + 1);
+            }
+        });
+
+        // Titan extension for scripts that want a menu which stays on screen.
+        // Rows are dark when disabled and turn green immediately when enabled.
+        gg.set("toggleMenu", new VarArgFunction() {
+            @Override
+            public Varargs invoke(Varargs args) {
+                LuaValue itemsValue = args.arg(1);
+                if (!itemsValue.istable()) return LuaValue.NIL;
+                String[] items = luaArrayToStrings(itemsValue.checktable());
+
+                boolean[] states = new boolean[items.length];
+                LuaValue statesValue = args.arg(2);
+                if (statesValue.istable()) {
+                    LuaTable table = statesValue.checktable();
+                    for (int i = 0; i < states.length; i++) {
+                        states[i] = table.get(i + 1).optboolean(false);
+                    }
+                }
+
+                String title = args.arg(3).optjstring("菜单");
+                Integer result = overlayUi.showToggleMenu(title, items, states);
                 return result == null ? LuaValue.NIL : LuaValue.valueOf(result + 1);
             }
         });
@@ -366,13 +388,14 @@ public class ScriptExecutorActivity extends Activity {
             }
         });
 
-        // Follow GameGuardian's visibility pattern: scripts can hide the UI,
-        // wait for the floating icon to be tapped, then open their menu again.
         gg.set("setVisible", new VarArgFunction() {
             @Override
             public Varargs invoke(Varargs args) {
                 if (args.arg(1).optboolean(true)) LuaRuntimeState.requestUi();
-                else LuaRuntimeState.hideUi();
+                else {
+                    LuaRuntimeState.hideUi();
+                    overlayUi.dismissActive();
+                }
                 return LuaValue.NONE;
             }
         });
