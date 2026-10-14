@@ -1,16 +1,17 @@
 package com.tci.injector;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.tci.injector.R;
 
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaTable;
@@ -23,10 +24,13 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ScriptExecutorActivity extends Activity {
 
@@ -51,9 +55,9 @@ public class ScriptExecutorActivity extends Activity {
         executeScriptButton = findViewById(R.id.execute_script_button);
 
         appendConsoleLine("[TITAN LUA LAB]");
-        appendConsoleLine("> LuaJ sandbox initialized.");
-        appendConsoleLine("> GG-style API: gg.searchNumber / refineNumber / getResults / editAll / setValues / addListItems");
-        appendConsoleLine("> SAFETY: scripts can only modify FakeMemoryManager synthetic data.");
+        appendConsoleLine("> GG-style Lua sandbox ready.");
+        appendConsoleLine("> GUI: gg.choice / gg.multiChoice / gg.prompt / gg.alert");
+        appendConsoleLine("> MEMORY: synthetic in-app data only.");
 
         selectScriptButton.setOnClickListener(this::selectScriptFile);
         executeScriptButton.setOnClickListener(this::executeScript);
@@ -77,11 +81,10 @@ public class ScriptExecutorActivity extends Activity {
             scriptEditor.setText(source);
             String name = uri.getLastPathSegment() == null ? uri.toString() : uri.getLastPathSegment();
             scriptPathDisplay.setText("LUA  ·  " + name);
-            appendConsoleLine("> [LOAD] Lua file loaded: " + name);
-            appendConsoleLine("> [SAFE] io/os/package/luajava are disabled.");
+            appendConsoleLine("> [LOAD] " + name);
             Toast.makeText(this, "Lua loaded", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            appendConsoleLine("> [ERROR] Could not read Lua file: " + e.getMessage());
+            appendConsoleLine("> [ERROR] " + e.getMessage());
             Toast.makeText(this, "Could not read Lua file", Toast.LENGTH_SHORT).show();
         }
     }
@@ -106,21 +109,21 @@ public class ScriptExecutorActivity extends Activity {
     private void executeScript(View view) {
         final String source = scriptEditor.getText().toString();
         if (source.trim().isEmpty()) {
-            Toast.makeText(this, "Load a .lua file or enter Lua first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Load a .lua file first", Toast.LENGTH_SHORT).show();
             return;
         }
 
         executeScriptButton.setEnabled(false);
-        appendConsoleLine("\n> [EXEC] Running Lua locally...");
+        appendConsoleLine("\n> [EXEC] Running Lua...");
 
         scriptExecutor.execute(() -> {
             try {
                 Globals globals = createSandboxGlobals();
                 globals.load(source, "titan-script.lua").call();
-                appendConsoleThreadSafe("[DONE] Lua execution completed locally.");
+                appendConsoleThreadSafe("[DONE] Lua finished.");
             } catch (Throwable error) {
                 String message = error.getMessage();
-                appendConsoleThreadSafe("[LUA ERROR] " + error.getClass().getSimpleName() + ": " + (message == null ? "unknown error" : message));
+                appendConsoleThreadSafe("[LUA ERROR] " + (message == null ? error.getClass().getSimpleName() : message));
             } finally {
                 runOnUiThread(() -> executeScriptButton.setEnabled(true));
             }
@@ -129,8 +132,6 @@ public class ScriptExecutorActivity extends Activity {
 
     private Globals createSandboxGlobals() {
         Globals globals = JsePlatform.standardGlobals();
-
-        // Keep normal Lua language features, but remove file/system/Java escape hatches.
         globals.set("io", LuaValue.NIL);
         globals.set("os", LuaValue.NIL);
         globals.set("package", LuaValue.NIL);
@@ -141,8 +142,7 @@ public class ScriptExecutorActivity extends Activity {
         globals.set("debug", LuaValue.NIL);
 
         globals.set("print", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 StringBuilder line = new StringBuilder();
                 for (int i = 1; i <= args.narg(); i++) {
                     if (i > 1) line.append("\t");
@@ -171,68 +171,106 @@ public class ScriptExecutorActivity extends Activity {
         gg.set("TYPE_AUTO", LuaValue.valueOf(127));
 
         gg.set("toast", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 String message = args.arg(1).optjstring("");
                 runOnUiThread(() -> Toast.makeText(ScriptExecutorActivity.this, message, Toast.LENGTH_SHORT).show());
-                appendConsoleThreadSafe("[TOAST] " + message);
                 return LuaValue.NONE;
             }
         });
 
         gg.set("alert", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 String message = args.arg(1).optjstring("");
-                runOnUiThread(() -> Toast.makeText(ScriptExecutorActivity.this, message, Toast.LENGTH_LONG).show());
-                appendConsoleThreadSafe("[ALERT] " + message);
-                return LuaValue.valueOf(1);
+                String positive = args.arg(2).optjstring("OK");
+                String negative = args.arg(3).optjstring("");
+                return LuaValue.valueOf(showAlertBlocking(message, positive, negative));
+            }
+        });
+
+        gg.set("choice", new VarArgFunction() {
+            @Override public Varargs invoke(Varargs args) {
+                LuaValue itemsValue = args.arg(1);
+                if (!itemsValue.istable()) return LuaValue.NIL;
+                String[] items = luaArrayToStrings(itemsValue.checktable());
+                int selected = Math.max(0, args.arg(2).optint(0) - 1);
+                String title = args.arg(3).optjstring("Select");
+                Integer result = showChoiceBlocking(title, items, selected);
+                return result == null ? LuaValue.NIL : LuaValue.valueOf(result + 1);
+            }
+        });
+
+        gg.set("multiChoice", new VarArgFunction() {
+            @Override public Varargs invoke(Varargs args) {
+                LuaValue itemsValue = args.arg(1);
+                if (!itemsValue.istable()) return LuaValue.NIL;
+                String[] items = luaArrayToStrings(itemsValue.checktable());
+                boolean[] checked = new boolean[items.length];
+                LuaValue defaults = args.arg(2);
+                if (defaults.istable()) {
+                    LuaTable table = defaults.checktable();
+                    for (int i = 0; i < checked.length; i++) checked[i] = table.get(i + 1).optboolean(false);
+                }
+                String title = args.arg(3).optjstring("Select");
+                boolean[] result = showMultiChoiceBlocking(title, items, checked);
+                if (result == null) return LuaValue.NIL;
+                LuaTable out = new LuaTable();
+                for (int i = 0; i < result.length; i++) if (result[i]) out.set(i + 1, LuaValue.TRUE);
+                return out;
+            }
+        });
+
+        gg.set("prompt", new VarArgFunction() {
+            @Override public Varargs invoke(Varargs args) {
+                LuaValue labelsValue = args.arg(1);
+                if (!labelsValue.istable()) return LuaValue.NIL;
+                String[] labels = luaArrayToStrings(labelsValue.checktable());
+                String[] defaults = new String[labels.length];
+                LuaValue defaultsValue = args.arg(2);
+                if (defaultsValue.istable()) {
+                    LuaTable table = defaultsValue.checktable();
+                    for (int i = 0; i < labels.length; i++) defaults[i] = table.get(i + 1).optjstring("");
+                }
+                String[] values = showPromptBlocking("Input", labels, defaults);
+                if (values == null) return LuaValue.NIL;
+                LuaTable out = new LuaTable();
+                for (int i = 0; i < values.length; i++) out.set(i + 1, LuaValue.valueOf(values[i]));
+                return out;
             }
         });
 
         gg.set("searchNumber", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 int value = parseSyntheticInt(args.arg(1));
-                int flags = args.arg(2).optint(127);
                 memory.generateNewResults(value);
-                int count = memory.getCurrentResults().size();
-                appendConsoleThreadSafe("[SEARCH] " + value + " flags=" + flags + " -> " + count + " synthetic results");
+                appendConsoleThreadSafe("[SEARCH] " + value + " -> " + memory.getCurrentResults().size());
                 return LuaValue.NONE;
             }
         });
 
         gg.set("refineNumber", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 int target = parseSyntheticInt(args.arg(1));
                 List<FakeMemoryManager.MemoryResult> results = memory.getCurrentResults();
                 Iterator<FakeMemoryManager.MemoryResult> iterator = results.iterator();
-                while (iterator.hasNext()) {
-                    if (iterator.next().valueDec != target) iterator.remove();
-                }
-                appendConsoleThreadSafe("[REFINE] value=" + target + " -> " + results.size() + " results");
+                while (iterator.hasNext()) if (iterator.next().valueDec != target) iterator.remove();
                 return LuaValue.NONE;
             }
         });
 
         gg.set("getResultsCount", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 return LuaValue.valueOf(memory.getCurrentResults().size());
             }
         });
 
         gg.set("getResults", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 List<FakeMemoryManager.MemoryResult> results = memory.getCurrentResults();
                 int requested = args.arg(1).optint(results.size());
                 int skip = Math.max(0, args.arg(2).optint(0));
                 int end = Math.min(results.size(), skip + Math.max(0, requested));
-
                 LuaTable output = new LuaTable();
-                int luaIndex = 1;
+                int index = 1;
                 for (int i = skip; i < end; i++) {
                     FakeMemoryManager.MemoryResult item = results.get(i);
                     LuaTable row = new LuaTable();
@@ -241,103 +279,67 @@ public class ScriptExecutorActivity extends Activity {
                     row.set("flags", LuaValue.valueOf(4));
                     row.set("region", LuaValue.valueOf(item.region));
                     row.set("freeze", LuaValue.valueOf(item.isFrozen));
-                    output.set(luaIndex++, row);
+                    output.set(index++, row);
                 }
                 return output;
             }
         });
 
         gg.set("editAll", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
-                int newValue = parseSyntheticInt(args.arg(1));
-                List<FakeMemoryManager.MemoryResult> results = memory.getCurrentResults();
-                for (FakeMemoryManager.MemoryResult item : results) item.setValue(newValue);
-                appendConsoleThreadSafe("[EDIT ALL] " + results.size() + " results -> " + newValue);
+            @Override public Varargs invoke(Varargs args) {
+                int value = parseSyntheticInt(args.arg(1));
+                for (FakeMemoryManager.MemoryResult item : memory.getCurrentResults()) item.setValue(value);
                 return LuaValue.NONE;
             }
         });
 
         gg.set("setValues", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 LuaValue value = args.arg(1);
                 if (!value.istable()) return LuaValue.FALSE;
                 LuaTable table = value.checktable();
-                List<FakeMemoryManager.MemoryResult> results = memory.getCurrentResults();
-                int changed = 0;
-
                 for (int i = 1; i <= table.length(); i++) {
                     LuaValue rowValue = table.get(i);
                     if (!rowValue.istable()) continue;
                     LuaTable row = rowValue.checktable();
-                    String address = row.get("address").optjstring("");
-                    LuaValue newValue = row.get("value");
-                    if (address.isEmpty() || newValue.isnil()) continue;
-
-                    for (FakeMemoryManager.MemoryResult item : results) {
-                        if (item.fakeAddress.equalsIgnoreCase(address)) {
-                            item.setValue(parseSyntheticInt(newValue));
-                            changed++;
-                            break;
-                        }
-                    }
+                    FakeMemoryManager.MemoryResult item = memory.findByAddress(row.get("address").optjstring(""));
+                    if (item != null && !row.get("value").isnil()) item.setValue(parseSyntheticInt(row.get("value")));
                 }
-
-                appendConsoleThreadSafe("[SET VALUES] changed=" + changed);
                 return LuaValue.TRUE;
             }
         });
 
         gg.set("addListItems", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 LuaValue value = args.arg(1);
                 if (!value.istable()) return LuaValue.FALSE;
                 LuaTable table = value.checktable();
-                List<FakeMemoryManager.MemoryResult> results = memory.getCurrentResults();
-                int frozen = 0;
-
                 for (int i = 1; i <= table.length(); i++) {
                     LuaValue rowValue = table.get(i);
                     if (!rowValue.istable()) continue;
                     LuaTable row = rowValue.checktable();
-                    String address = row.get("address").optjstring("");
-                    boolean freeze = row.get("freeze").optboolean(false);
-                    if (!freeze || address.isEmpty()) continue;
-
-                    for (FakeMemoryManager.MemoryResult item : results) {
-                        if (item.fakeAddress.equalsIgnoreCase(address)) {
-                            LuaValue desiredValue = row.get("value");
-                            if (!desiredValue.isnil()) item.setValue(parseSyntheticInt(desiredValue));
-                            item.isFrozen = true;
-                            frozen++;
-                            break;
-                        }
+                    FakeMemoryManager.MemoryResult item = memory.findByAddress(row.get("address").optjstring(""));
+                    if (item != null) {
+                        if (!row.get("value").isnil()) item.setValue(parseSyntheticInt(row.get("value")));
+                        item.isFrozen = row.get("freeze").optboolean(item.isFrozen);
+                        memory.saveResult(item);
                     }
                 }
-
-                appendConsoleThreadSafe("[LIST] frozen=" + frozen);
                 return LuaValue.TRUE;
             }
         });
 
         gg.set("clearResults", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
+            @Override public Varargs invoke(Varargs args) {
                 memory.clearResults();
-                appendConsoleThreadSafe("[CLEAR] Search results cleared");
                 return LuaValue.NONE;
             }
         });
 
         gg.set("sleep", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
-                long requested = Math.max(0, args.arg(1).optlong(0));
-                long delay = Math.min(requested, 5000);
+            @Override public Varargs invoke(Varargs args) {
                 try {
-                    Thread.sleep(delay);
+                    Thread.sleep(Math.min(Math.max(0, args.arg(1).optlong(0)), 5000));
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -346,31 +348,123 @@ public class ScriptExecutorActivity extends Activity {
         });
 
         gg.set("setVisible", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
-                appendConsoleThreadSafe("[UI] gg.setVisible(" + args.arg(1).optboolean(false) + ") (simulated)");
+            @Override public Varargs invoke(Varargs args) {
+                boolean visible = args.arg(1).optboolean(true);
+                runOnUiThread(() -> getWindow().getDecorView().setVisibility(visible ? View.VISIBLE : View.INVISIBLE));
                 return LuaValue.NONE;
             }
         });
 
         gg.set("isVisible", new VarArgFunction() {
-            @Override
-            public Varargs invoke(Varargs args) {
-                return LuaValue.FALSE;
+            @Override public Varargs invoke(Varargs args) {
+                return LuaValue.valueOf(getWindow().getDecorView().getVisibility() == View.VISIBLE);
             }
         });
 
         return gg;
     }
 
+    private int showAlertBlocking(String message, String positive, String negative) {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Integer> result = new AtomicReference<>(0);
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setMessage(message)
+                    .setPositiveButton(positive, (d, w) -> { result.set(1); latch.countDown(); })
+                    .setOnCancelListener(d -> latch.countDown());
+            if (!negative.isEmpty()) builder.setNegativeButton(negative, (d, w) -> { result.set(2); latch.countDown(); });
+            builder.show();
+        });
+        await(latch);
+        return result.get();
+    }
+
+    private Integer showChoiceBlocking(String title, String[] items, int selected) {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Integer> result = new AtomicReference<>(null);
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setSingleChoiceItems(items, selected >= items.length ? -1 : selected, (dialog, which) -> {
+                    result.set(which);
+                    dialog.dismiss();
+                    latch.countDown();
+                })
+                .setNegativeButton("Cancel", (d, w) -> latch.countDown())
+                .setOnCancelListener(d -> latch.countDown())
+                .show());
+        await(latch);
+        return result.get();
+    }
+
+    private boolean[] showMultiChoiceBlocking(String title, String[] items, boolean[] initial) {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<boolean[]> result = new AtomicReference<>(null);
+        boolean[] working = initial.clone();
+        runOnUiThread(() -> new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMultiChoiceItems(items, working, (d, which, checked) -> working[which] = checked)
+                .setPositiveButton("OK", (d, w) -> { result.set(working.clone()); latch.countDown(); })
+                .setNegativeButton("Cancel", (d, w) -> latch.countDown())
+                .setOnCancelListener(d -> latch.countDown())
+                .show());
+        await(latch);
+        return result.get();
+    }
+
+    private String[] showPromptBlocking(String title, String[] labels, String[] defaults) {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<String[]> result = new AtomicReference<>(null);
+        runOnUiThread(() -> {
+            LinearLayout container = new LinearLayout(this);
+            container.setOrientation(LinearLayout.VERTICAL);
+            int pad = (int) (16 * getResources().getDisplayMetrics().density);
+            container.setPadding(pad, pad / 2, pad, 0);
+            List<EditText> fields = new ArrayList<>();
+            for (int i = 0; i < labels.length; i++) {
+                EditText input = new EditText(this);
+                input.setHint(labels[i]);
+                input.setText(defaults[i] == null ? "" : defaults[i]);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                container.addView(input);
+                fields.add(input);
+            }
+            new AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setView(container)
+                    .setPositiveButton("OK", (d, w) -> {
+                        String[] values = new String[fields.size()];
+                        for (int i = 0; i < fields.size(); i++) values[i] = fields.get(i).getText().toString();
+                        result.set(values);
+                        latch.countDown();
+                    })
+                    .setNegativeButton("Cancel", (d, w) -> latch.countDown())
+                    .setOnCancelListener(d -> latch.countDown())
+                    .show();
+        });
+        await(latch);
+        return result.get();
+    }
+
+    private String[] luaArrayToStrings(LuaTable table) {
+        String[] result = new String[table.length()];
+        for (int i = 0; i < result.length; i++) result[i] = table.get(i + 1).optjstring("");
+        return result;
+    }
+
+    private void await(CountDownLatch latch) {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
     private int parseSyntheticInt(LuaValue value) {
         if (value.isnumber()) return (int) Math.round(value.todouble());
-
         String raw = value.optjstring("0").trim();
         if (raw.endsWith("D") || raw.endsWith("d") || raw.endsWith("F") || raw.endsWith("f") || raw.endsWith("Q") || raw.endsWith("q")) {
             raw = raw.substring(0, raw.length() - 1).trim();
         }
-
         try {
             if (raw.startsWith("0x") || raw.startsWith("0X")) return (int) Long.parseLong(raw.substring(2), 16);
             return (int) Math.round(Double.parseDouble(raw));
@@ -384,8 +478,7 @@ public class ScriptExecutorActivity extends Activity {
     }
 
     private void appendConsoleLine(String line) {
-        String currentText = consoleOutput.getText().toString();
-        consoleOutput.setText(currentText + "\n" + line);
+        consoleOutput.setText(consoleOutput.getText().toString() + "\n" + line);
     }
 
     @Override
